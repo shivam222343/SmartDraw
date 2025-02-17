@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Drawing</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid black;
+            cursor: crosshair;
+            touch-action: none; /* Prevents scrolling when drawing */
+            background-color: white;
+                }
+        .controls {
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Draw Something on the Canvas</h2>
+    <canvas id="drawingCanvas" width="600" height="400"></canvas>
+    <br>
+    <div class="controls">
+        <label for="colorPicker">Choose Color:</label>
+        <input type="color" id="colorPicker" value="#000000">
+        
+        <label for="penSize">Stroke Size:</label>
+        <input type="range" id="penSize" min="1" max="10" value="5">
+        
+        <button onclick="toggleEraser()">Eraser</button>
+        <button onclick="clearCanvas()">Clear</button>
+    </div>
+
+
+    <script>
+        const canvas = document.getElementById("drawingCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let isDrawing = false;
+        let isErasing = false;
+        let penColor = "#000000";
+        let penSize = 5;
+
+        function startDraw(x, y) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function draw(x, y) {
+            if (!isDrawing) return;
+            ctx.lineTo(x, y);
+            ctx.lineWidth = penSize;
+            ctx.strokeStyle = isErasing ? "white" : penColor;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
+
+        function stopDraw() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function toggleEraser(e) {
+            isErasing = !isErasing;
+            e.target.style.cursor = ""
+
+        }
+
+        // Event Listeners
+        canvas.addEventListener("mousedown", (e) => startDraw(e.offsetX, e.offsetY));
+        canvas.addEventListener("mousemove", (e) => draw(e.offsetX, e.offsetY));
+        canvas.addEventListener("mouseup", stopDraw);
+        canvas.addEventListener("mouseleave", stopDraw);
+
+        // Touch Events for Mobile Support
+        canvas.addEventListener("touchstart", (e) => startDraw(e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop));
+        canvas.addEventListener("touchmove", (e) => {
+            draw(e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop);
+            e.preventDefault();
+        });
+        canvas.addEventListener("touchend", stopDraw);
+
+        // Update Color and Stroke Size
+        document.getElementById("colorPicker").addEventListener("input", (e) => {
+            penColor = e.target.value;
+            isErasing = false;
+        });
+
+        document.getElementById("penSize").addEventListener("input", (e) => {
+            penSize = e.target.value;
+        });
+
+    </script>
+</body>
+</html>
